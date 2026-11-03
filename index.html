@@ -15,6 +15,9 @@
     --accent:#ff9f43;
     --accent-2:#ff6b6b;
     --accent-3:#6c5ce7;
+    
+    --success:#1dd1a1;
+    --error:#ff6b6b;
 
     --card-w: min(240px, 66vw);
     --card-gap: 16px;
@@ -77,9 +80,14 @@
   .screen{
     position:fixed;inset:0;z-index:2;
     display:flex;flex-direction:column;align-items:center;justify-content:center;
-    transition:opacity .7s var(--ease-out-quint),transform .7s var(--ease-out-quint),filter .7s var(--ease-out-quint);
+    transition:opacity .6s var(--ease-out-quint),transform .6s var(--ease-out-quint),filter .6s var(--ease-out-quint);
   }
-  .screen.hidden{opacity:0;transform:scale(1.05);filter:blur(12px);pointer-events:none;}
+  .screen.hidden{opacity:0;transform:scale(1.02);filter:blur(12px);pointer-events:none;}
+  
+  /* Scrollable screens */
+  #menu, #quiz, #review { overflow-y: auto; justify-content: flex-start; padding: 30px 20px; -webkit-overflow-scrolling: touch; }
+  #menu::-webkit-scrollbar, #quiz::-webkit-scrollbar, #review::-webkit-scrollbar { width: 4px; }
+  #menu::-webkit-scrollbar-thumb, #quiz::-webkit-scrollbar-thumb, #review::-webkit-scrollbar-thumb { background: rgba(255,255,255,.1); border-radius: 4px; }
 
   /* MÀN 1 */
   #intro{cursor:pointer;}
@@ -107,12 +115,8 @@
   }
   @keyframes fadeIn{to{opacity:1;}}
 
-  /* MÀN 2 */
-  #pick{
-    gap:14px;
-    padding-top:env(safe-area-inset-top);
-    padding-bottom:env(safe-area-inset-bottom);
-  }
+  /* MÀN 2: CHỌN THÀNH VIÊN */
+  #pick{gap:14px;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);}
   .pick-header{display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 24px;}
   .pick-title{
     font-size:clamp(1.3rem,6vw,2.2rem);font-weight:800;letter-spacing:-.02em;text-align:center;
@@ -124,162 +128,241 @@
   @keyframes shine{to{background-position:200% center;}}
   .pick-sub{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);}
 
-  /* SLIDER */
   .slider{
-    position:relative;
-    display:flex;align-items:center;
-    gap:var(--card-gap);
-    width:100%;
-    padding-block:28px;
-    padding-inline:calc((100vw - var(--card-w)) / 2);
-    overflow-x:auto;overflow-y:hidden;
-    scroll-snap-type:x mandatory;
-    scrollbar-width:none;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior-x:contain;
-    touch-action:pan-x;
-    cursor:grab;
+    position:relative;display:flex;align-items:center;gap:var(--card-gap);
+    width:100%;padding-block:28px;padding-inline:calc((100vw - var(--card-w)) / 2);
+    overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;
+    scrollbar-width:none;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;
+    touch-action:pan-x;cursor:grab;
   }
   .slider::-webkit-scrollbar{display:none;}
   .slider.dragging{cursor:grabbing;scroll-snap-type:none;}
 
-  .card{
-    --p:0;
-    flex:0 0 auto;
-    width:var(--card-w);
-    scroll-snap-align:center;
-    scroll-snap-stop:always;
-    contain:content;
-  }
-
+  .card{ --p:0; flex:0 0 auto; width:var(--card-w); scroll-snap-align:center; scroll-snap-stop:always; contain:content; }
   .card-inner{
     border-radius:22px;
-    background:
-      linear-gradient(150deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.02) 55%, rgba(255,255,255,.05) 100%),
-      #15152a;
-    border:1px solid rgba(255,255,255,.08);
-    overflow:hidden;position:relative;cursor:pointer;
-
-    transform:
-      translate3d(0, calc(-8px * var(--p)), 0)
-      scale(calc(0.87 + 0.13 * var(--p)));
+    background:linear-gradient(150deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.02) 55%, rgba(255,255,255,.05) 100%), #15152a;
+    border:1px solid rgba(255,255,255,.08);overflow:hidden;position:relative;cursor:pointer;
+    transform:translate3d(0, calc(-8px * var(--p)), 0) scale(calc(0.87 + 0.13 * var(--p)));
     opacity:calc(0.4 + 0.6 * var(--p));
-
     transition:border-color .3s ease, box-shadow .3s ease;
-    will-change:transform, opacity;
-    backface-visibility:hidden;
+    will-change:transform, opacity;backface-visibility:hidden;
   }
-
   .avatar{
-    aspect-ratio:1/1.1;
-    display:flex;align-items:center;justify-content:center;
-    font-size:clamp(66px,19vw,100px);
-    position:relative;overflow:hidden;
-    background: #15152a;
+    aspect-ratio:1/1.1;display:flex;align-items:center;justify-content:center;
+    font-size:clamp(66px,19vw,100px);position:relative;overflow:hidden;background: #15152a;
   }
   .avatar::after{
     content:'';position:absolute;inset:0;
-    background:linear-gradient(180deg,transparent 40%,rgba(8,8,12,.9) 100%);
-    pointer-events:none;
+    background:linear-gradient(180deg,transparent 40%,rgba(8,8,12,.9) 100%);pointer-events:none;
   }
-  
-  .avatar img{
-    width:100%;height:100%;object-fit:cover;
-    position:relative;z-index:1;
-    object-position:center;
-  }
-  
+  .avatar img{width:100%;height:100%;object-fit:cover;position:relative;z-index:1;object-position:center;}
   .avatar .emo{
-    position:relative;z-index:1;
-    filter:drop-shadow(0 8px 24px rgba(0,0,0,.5));
-    transform:scale(calc(0.92 + 0.12 * var(--p)));
-    will-change:transform;
+    position:relative;z-index:1;filter:drop-shadow(0 8px 24px rgba(0,0,0,.5));
+    transform:scale(calc(0.92 + 0.12 * var(--p)));will-change:transform;
   }
-
   .name{
     padding:10px 14px 18px;text-align:center;font-weight:700;font-size:1rem;letter-spacing:-.01em;
-    position:relative;z-index:2;margin-top:-44px;
-    text-shadow:0 2px 12px rgba(0,0,0,.9);
+    position:relative;z-index:2;margin-top:-44px;text-shadow:0 2px 12px rgba(0,0,0,.9);
   }
   .tag{
-    position:absolute;top:12px;left:12px;
-    font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
-    background:rgba(8,8,12,.55);
-    padding:5px 10px;border-radius:999px;
-    border:1px solid rgba(255,255,255,.12);
-    z-index:3;
+    position:absolute;top:12px;left:12px;font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+    background:rgba(8,8,12,.55);padding:5px 10px;border-radius:999px;
+    border:1px solid rgba(255,255,255,.12);z-index:3;
   }
-
-  /* Selected */
   .card.selected .card-inner{
     border-color:rgba(255,159,67,.6);
-    box-shadow:
-      0 0 0 1px rgba(255,159,67,.4),
-      0 0 40px rgba(255,159,67,.4),
-      0 20px 40px rgba(0,0,0,.5);
+    box-shadow:0 0 0 1px rgba(255,159,67,.4), 0 0 40px rgba(255,159,67,.4), 0 20px 40px rgba(0,0,0,.5);
   }
   .card.selected .card-inner::before{
-    content:'✓';
-    position:absolute;top:10px;right:10px;
-    width:28px;height:28px;border-radius:50%;
-    background:linear-gradient(135deg,var(--accent),var(--accent-2));
-    color:#0a0a0f;font-weight:800;font-size:.95rem;
-    display:flex;align-items:center;justify-content:center;
-    z-index:4;
-    box-shadow:0 0 24px rgba(255,159,67,.7);
+    content:'✓';position:absolute;top:10px;right:10px;width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0a0a0f;font-weight:800;font-size:.95rem;
+    display:flex;align-items:center;justify-content:center;z-index:4;box-shadow:0 0 24px rgba(255,159,67,.7);
     animation:pop .4s var(--ease-spring);
   }
   @keyframes pop{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
 
-  /* Dots */
   .dots{display:flex;gap:6px;align-items:center;height:14px;}
   .dot{
-    width:6px;height:6px;border-radius:50%;
-    background:rgba(255,255,255,.18);border:none;padding:0;cursor:pointer;
+    width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.18);border:none;padding:0;cursor:pointer;
     transition:all .4s var(--ease-out-quint);
   }
   .dot.active{width:22px;border-radius:999px;background:var(--accent);box-shadow:0 0 12px rgba(255,159,67,.6);}
 
-  /* Confirm */
   .confirm{
     margin-top:6px;padding:15px 34px;border:none;border-radius:999px;
-    background:linear-gradient(135deg,var(--accent),var(--accent-2));
-    color:#0a0a0f;font-size:1rem;font-weight:800;letter-spacing:-.01em;
-    cursor:pointer;
-    opacity:0;transform:translateY(20px) scale(.9);pointer-events:none;
-    transition:all .5s var(--ease-spring);
-    box-shadow:0 10px 30px rgba(255,107,107,.35);
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0a0a0f;font-size:1rem;font-weight:800;
+    cursor:pointer;opacity:0;transform:translateY(20px) scale(.9);pointer-events:none;
+    transition:all .5s var(--ease-spring);box-shadow:0 10px 30px rgba(255,107,107,.35);
     font-family:inherit;position:relative;overflow:hidden;
   }
   .confirm::before{
-    content:'';position:absolute;inset:0;
-    background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.5) 50%,transparent 70%);
-    transform:translateX(-100%);
-    transition:transform .6s var(--ease-out-quint);
+    content:'';position:absolute;inset:0;background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.5) 50%,transparent 70%);
+    transform:translateX(-100%);transition:transform .6s var(--ease-out-quint);
   }
   .confirm:hover::before{transform:translateX(100%);}
   .confirm.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
-  .confirm:active{transform:scale(.96);transition-duration:.1s;}
+  .confirm:active{transform:scale(.96);}
 
-  /* MÀN 3 */
+  /* MÀN 3: DONE */
   #done{gap:16px;text-align:center;padding:0 32px;}
   #done .big{font-size:clamp(1rem,4.5vw,1.2rem);font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
   #done .who{
     font-size:clamp(1.8rem,8vw,3rem);font-weight:800;letter-spacing:-.02em;
-    background:linear-gradient(180deg,#fff 20%,var(--accent) 100%);
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-    text-shadow:0 0 40px rgba(255,159,67,.3);
+    background:linear-gradient(180deg,#fff 20%,var(--accent) 100%);-webkit-background-clip:text;background-clip:text;color:transparent;
   }
   #done .note{font-size:.85rem;color:var(--muted);max-width:340px;line-height:1.7;}
-  .ghost-btn{
-    margin-top:12px;padding:12px 26px;border-radius:999px;
-    background:transparent;border:1px solid rgba(255,255,255,.15);
-    color:var(--fg);font-size:.85rem;font-weight:600;
-    cursor:pointer;font-family:inherit;
+
+  /* COMMON BUTTONS */
+  .btn-primary{
+    padding:15px 34px;border:none;border-radius:999px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));color:#0a0a0f;
+    font-size:1rem;font-weight:800;cursor:pointer;font-family:inherit;
+    box-shadow:0 10px 30px rgba(255,107,107,.35);transition:all .3s var(--ease-out-quint);
+  }
+  .btn-primary:active{transform:scale(.96);}
+  .btn-ghost{
+    padding:12px 26px;border-radius:999px;background:transparent;border:1px solid rgba(255,255,255,.15);
+    color:var(--fg);font-size:.9rem;font-weight:600;cursor:pointer;font-family:inherit;
     transition:all .3s var(--ease-out-quint);
   }
-  .ghost-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);}
-  .ghost-btn:active{transform:translateY(0) scale(.97);}
+  .btn-ghost:hover{border-color:var(--accent);color:var(--accent);}
+  .btn-ghost:active{transform:scale(.97);}
+  .btn-sm{padding:8px 18px;font-size:.8rem;}
+
+  /* ===== MÀN 4: MENU BÀI TẬP ===== */
+  .menu-container{width:100%;max-width:480px;display:flex;flex-direction:column;gap:24px;margin-top:40px;}
+  .menu-header{text-align:center;}
+  .menu-title{
+    font-size:clamp(1.5rem,6vw,2rem);font-weight:800;
+    background:linear-gradient(180deg,#fff,var(--accent));-webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  .menu-user{font-size:.9rem;color:var(--muted);margin-top:4px;}
+  
+  .lesson-list{display:flex;flex-direction:column;gap:16px;}
+  .lesson-card{
+    display:flex;align-items:center;gap:16px;padding:20px;border-radius:20px;
+    background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
+    cursor:pointer;transition:all .3s var(--ease-out-quint);
+  }
+  .lesson-card:hover{
+    background:rgba(255,255,255,.08);border-color:rgba(255,159,67,.4);transform:translateY(-2px);
+    box-shadow:0 10px 30px rgba(0,0,0,.3);
+  }
+  .lesson-card:active{transform:scale(.98);}
+  .lesson-icon{
+    width:50px;height:50px;border-radius:14px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:flex;align-items:center;justify-content:center;font-size:1.5rem;
+    box-shadow:0 4px 16px rgba(255,159,67,.4);
+  }
+  .lesson-info{flex:1;}
+  .lesson-name{font-size:1.1rem;font-weight:700;}
+  .lesson-desc{font-size:.75rem;color:var(--muted);margin-top:2px;}
+  .lesson-arrow{font-size:1.2rem;color:var(--muted);}
+
+  /* ===== MÀN 5: LÀM BÀI ===== */
+  .quiz-container{width:100%;max-width:600px;display:flex;flex-direction:column;gap:24px;margin-top:20px;}
+  .quiz-header{display:flex;align-items:center;gap:12px;}
+  .quiz-progress{flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:99px;overflow:hidden;}
+  .quiz-progress-bar{
+    height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    border-radius:99px;transition:width .4s var(--ease-out-quint);
+  }
+  .quiz-counter{font-size:.9rem;font-weight:700;color:var(--muted);min-width:40px;text-align:right;}
+  
+  .quiz-body{
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+    border-radius:24px;padding:24px;
+  }
+  .question-text{font-size:1.05rem;line-height:1.6;font-weight:600;margin-bottom:24px;}
+  .options-list{display:flex;flex-direction:column;gap:10px;}
+  .option{
+    display:flex;align-items:flex-start;gap:12px;padding:14px 16px;border-radius:14px;
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+    cursor:pointer;transition:all .2s ease;
+  }
+  .option:hover:not(.disabled){background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2);}
+  .option.disabled{cursor:default;}
+  .opt-label{font-weight:800;color:var(--muted);min-width:20px;}
+  .opt-text{font-size:.95rem;line-height:1.4;color:var(--fg);}
+  
+  /* States */
+  .option.selected{border-color:rgba(255,159,67,.5);}
+  .option.correct{background:rgba(29,209,161,.15);border-color:var(--success);}
+  .option.correct .opt-label{color:var(--success);}
+  .option.wrong{background:rgba(255,107,107,.15);border-color:var(--error);}
+  .option.wrong .opt-label{color:var(--error);}
+  .option.correct .opt-text{color:var(--success);}
+  .option.wrong .opt-text{color:var(--error);}
+  
+  .feedback{
+    margin-top:20px;padding:14px 16px;border-radius:12px;
+    font-size:.9rem;font-weight:600;line-height:1.5;
+    display:flex;align-items:flex-start;gap:10px;
+  }
+  .feedback.correct{background:rgba(29,209,161,.1);color:var(--success);border:1px solid rgba(29,209,161,.3);}
+  .feedback.wrong{background:rgba(255,107,107,.1);color:var(--error);border:1px solid rgba(255,107,107,.3);}
+  .feedback .icon{font-weight:900;font-size:1.1rem;}
+  .feedback strong{color:#fff;font-weight:700;}
+  .feedback.hidden{display:none;}
+  
+  .quiz-footer{display:flex;justify-content:flex-end;}
+  .quiz-footer .btn-primary.hidden{display:none;}
+
+  /* ===== MÀN 6: TỔNG KẾT ===== */
+  .result-container{display:flex;flex-direction:column;align-items:center;gap:20px;text-align:center;}
+  .result-circle{
+    width:140px;height:140px;border-radius:50%;
+    background:conic-gradient(var(--accent) 0%, var(--accent-2) 100%);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    box-shadow:0 0 40px rgba(255,159,67,.3);position:relative;
+  }
+  .result-circle::before{
+    content:'';position:absolute;inset:6px;border-radius:50%;background:var(--bg);
+  }
+  .result-score{font-size:2.5rem;font-weight:800;line-height:1;position:relative;z-index:1;}
+  .result-total{font-size:.9rem;color:var(--muted);position:relative;z-index:1;}
+  
+  .result-eval{
+    font-size:1.6rem;font-weight:800;padding:8px 24px;border-radius:12px;
+    text-transform:uppercase;letter-spacing:.05em;
+  }
+  
+  /* Ảnh kết quả */
+  .result-img {
+    width: 180px;
+    height: 180px;
+    border-radius: 20px;
+    object-fit: cover;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.6);
+    opacity: 0;
+    transform: scale(0.8) translateY(20px);
+    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: none;
+  }
+  .result-img.show {
+    display: block;
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  
+  .result-actions{display:flex;gap:12px;margin-top:16px;}
+
+  /* ===== MÀN 7: XEM LẠI ===== */
+  .review-container{width:100%;max-width:600px;display:flex;flex-direction:column;gap:24px;margin-top:20px;}
+  .review-header{display:flex;justify-content:space-between;align-items:center;}
+  .review-header h2{font-size:1.3rem;font-weight:800;}
+  .review-list{display:flex;flex-direction:column;gap:20px;padding-bottom:40px;}
+  .review-item{
+    background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+    border-radius:20px;padding:20px;
+  }
+  .review-q{font-size:.95rem;font-weight:600;line-height:1.5;margin-bottom:16px;}
+  .review-item .option{padding:10px 12px;font-size:.9rem;pointer-events:none;}
+  .review-answer{margin-top:14px;font-size:.85rem;font-weight:600;line-height:1.5;padding-top:12px;border-top:1px solid rgba(255,255,255,.08);}
+  .icon-check{color:var(--success);font-weight:900;margin-left:auto;}
+  .icon-x{color:var(--error);font-weight:900;margin-left:auto;}
 </style>
 </head>
 <body>
@@ -287,11 +370,13 @@
 <div class="aurora"></div>
 <div class="grain"></div>
 
+<!-- MÀN 1 -->
 <div id="intro" class="screen">
   <h1 id="greeting"></h1>
   <div class="skip-hint">bấm để bỏ qua</div>
 </div>
 
+<!-- MÀN 2 -->
 <div id="pick" class="screen hidden">
   <div class="pick-header">
     <div class="pick-title">Mày là thằng l nào?</div>
@@ -302,21 +387,89 @@
   <button class="confirm" id="confirmBtn"></button>
 </div>
 
+<!-- MÀN 3 -->
 <div id="done" class="screen hidden">
   <div class="big">Chốt</div>
   <div class="who" id="doneName"></div>
-  <div class="note">Danh tính đã ghi nhận. Bài tập Sử sắp mở.</div>
-  <button class="ghost-btn" id="backBtn">← chọn lại</button>
+  <div class="note">Danh tính đã ghi nhận. Bài tập Sử đã sẵn sàng.</div>
+  <button class="btn-primary" id="enterBtn" style="margin-top:16px;">Vào học →</button>
+  <button class="btn-ghost" id="backBtn" style="margin-top:8px;">← chọn lại</button>
+</div>
+
+<!-- MÀN 4: MENU BÀI TẬP -->
+<div id="menu" class="screen hidden">
+  <div class="menu-container">
+    <div class="menu-header">
+      <div class="menu-title">Chọn Bài Tập</div>
+      <div class="menu-user" id="menuUser"></div>
+    </div>
+    <div class="lesson-list">
+      <div class="lesson-card" onclick="startQuiz()">
+        <div class="lesson-icon">📜</div>
+        <div class="lesson-info">
+          <div class="lesson-name">Bài 1: Liên Hợp Quốc</div>
+          <div class="lesson-desc">20 câu hỏi trắc nghiệm</div>
+        </div>
+        <div class="lesson-arrow">→</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MÀN 5: LÀM BÀI -->
+<div id="quiz" class="screen hidden">
+  <div class="quiz-container">
+    <div class="quiz-header">
+      <div class="quiz-progress">
+        <div class="quiz-progress-bar" id="quizProgressBar"></div>
+      </div>
+      <div class="quiz-counter"><span id="quizCurrent">1</span>/20</div>
+    </div>
+    <div class="quiz-body" id="quizBody"></div>
+    <div class="quiz-footer">
+      <button class="btn-primary hidden" id="nextBtn" onclick="nextQuestion()">Tiếp tục</button>
+    </div>
+  </div>
+</div>
+
+<!-- MÀN 6: TỔNG KẾT -->
+<div id="result" class="screen hidden">
+  <div class="result-container">
+    <div class="result-circle">
+      <div class="result-score" id="resultScore">0</div>
+      <div class="result-total">/20</div>
+    </div>
+    
+    <div class="result-eval" id="resultEval"></div>
+    <!-- Ảnh chèn thêm theo yêu cầu -->
+    <img id="resultImg" class="result-img" src="" alt="Minh họa">
+    
+    <div class="result-actions">
+      <button class="btn-primary" onclick="showReview()">Xem lại bài</button>
+      <button class="btn-ghost" onclick="backToMenu()">Về Menu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MÀN 7: XEM LẠI -->
+<div id="review" class="screen hidden">
+  <div class="review-container">
+    <div class="review-header">
+      <h2>Xem Lại Bài Làm</h2>
+      <button class="btn-ghost btn-sm" onclick="backToResult()">← Quay lại</button>
+    </div>
+    <div class="review-list" id="reviewList"></div>
+  </div>
 </div>
 
 <script>
 /* ============================================================
-   DANH SÁCH 10 THÀNH VIÊN — ĐÃ ĐỔI TÊN TƯƠNG ỨNG
+   DỮ LIỆU THÀNH VIÊN
    ============================================================ */
 const MEMBERS = [
   { name:'Nhật Khánh',  img:'lon/khanh.webp',   emoji:'🐵', c1:'#ff6b6b', c2:'#ee5a24' },
   { name:'Gia Hào',     img:'lon/hao.webp',     emoji:'🐸', c1:'#48dbfb', c2:'#0abde3' },
-  { name:'Thiện',       img:'lon/thien.webp',   emoji:'🐷', c1:'#f368e0', c2:'#e84393' }, // Số 3
+  { name:'Thiện',       img:'lon/thien.webp',   emoji:'🐷', c1:'#f368e0', c2:'#e84393' },
   { name:'Minh Hải',    img:'lon/hai.jpg',      emoji:'🐔', c1:'#1dd1a1', c2:'#10ac84' },
   { name:'Hữu Quốc',    img:'lon/quoc.webp',    emoji:'🐶', c1:'#feca57', c2:'#ff9f43' },
   { name:'Đình Khiêm',  img:'lon/khiem.jpeg',   emoji:'🐱', c1:'#a29bfe', c2:'#6c5ce7' },
@@ -325,8 +478,33 @@ const MEMBERS = [
   { name:'Bảo Nam',     img:'lon/nam.jpg',      emoji:'🐺', c1:'#74b9ff', c2:'#0984e3' },
   { name:'Miki',        img:'lon/miki.webp',    emoji:'🐯', c1:'#ffeaa7', c2:'#fdcb6e' },
 ];
+const INITIAL_INDEX = 4;
 
-const INITIAL_INDEX = 4; // index 4 = Hữu Quốc
+/* ============================================================
+   DỮ LIỆU CÂU HỎI BÀI 1
+   ============================================================ */
+const QUESTIONS = [
+  { q: "Tại Hội nghị Tê-hê-ran (I-ran), nguyên thủ 3 nước Liên Xô, Mĩ, Anh khẳng định", options: ["thành lập quân đội giữ gìn hòa bình.", "quyết tâm thành lập Liên hợp quốc.", "nguyên tắc phân chia nước Đức", "nhanh chóng đánh bại phát xít Đức."], correct: 1 },
+  { q: "Một trong những quốc gia có vai trò quan trọng trong quá trình hình thành Liên hợp quốc là", options: ["Thái Lan.", "Nhật Bản.", "Liên Xô.", "Lào."], correct: 2 },
+  { q: "Đầu năm 1945, đâu là vấn đề cấp bách đặt ra cho các nước Đồng minh chống phát xít?", options: ["Tổ chức lại thế giới sau chiến tranh.", "Thiết lập trật tự thế giới mới hai cực.", "Phục hồi và phát triển kinh tế thế giới.", "Phân chia lại thuộc địa của các nước."], correct: 0 },
+  { q: "Quá trình hình thành Liên hợp quốc gắn liền với vai trò quan trọng của các quốc gia nào?", options: ["Liên Xô, Mỹ, Đức.", "Mỹ, Anh, Pháp.", "Liên Xô, Trung Quốc, Đức.", "Liên Xô, Mỹ, Anh."], correct: 3 },
+  { q: "Một trong những quốc gia có vai trò quan trọng trong quá trình hình thành Liên hợp quốc là", options: ["Thái Lan.", "Mỹ.", "Nhật Bản.", "Lào."], correct: 1 },
+  { q: "Năm 1945, bản Hiến chương Liên hợp quốc được thông qua tại", options: ["hội nghị Tam cường I-an-ta.", "hội nghị Bàn Môn Điếm.", "hội nghị Vécxai - Oasinhtơn.", "hội nghị Xan Phran-xi-xcô."], correct: 3 },
+  { q: "Trong giai đoạn cuối của Chiến tranh thế giới thứ hai, một trong những vấn đề cấp bách đặt ra là", options: ["giúp đỡ các nước Đông Âu xây dựng cơ sở vật chất của chủ nghĩa xã hội.", "thành lập một ủy ban giúp đỡ các nước phát xít khắc phục hậu quả chiến tranh.", "liên minh giữa Liên Xô và Mĩ để thiết lập trật tự thế giới mới sau chiến tranh.", "thành lập một tổ chức quốc tế nhằm duy trì hòa bình và trật tự thế giới mới."], correct: 3 },
+  { q: "Từ cuối tháng 4 đến cuối tháng 6-1945, 50 nước họp tại Xan Phran-xi-xcô (Mỹ) thông qua nội dung nào sau đây?", options: ["Hiến chương Liên hợp quốc.", "Xét xử tội phạm chiến tranh thế giới.", "Tiêu diệt tận gốc phát xít Nhật.", "Kết thúc chiến tranh Triều Tiên."], correct: 0 },
+  { q: "Yêu cầu bức thiết nào sau đây được đặt ra cho các nước Đồng minh khi cuộc chiến tranh thế giới thứ hai bước vào giai đoạn cuối?", options: ["Tiêu diệt hoàn toàn chủ nghĩa phát xít và tổ chức lại thế giới.", "Thủ tiêu tất cả các hình thức của chế độ phân biệt chủng tộc.", "Thành lập tổ chức Hội Quốc liên để ngăn chặn chiến tranh.", "Đẩy mạnh xu thế khu vực hóa và toàn cầu hóa kinh tế."], correct: 0 },
+  { q: "Nhằm duy trì hòa bình và an ninh thế giới sau chiến tranh, Hội nghị I-an-ta (2-1945) có quyết định quan trọng nào sau đây?", options: ["Thành lập Ban Thư kí Liên hợp quốc.", "Duy trì và mở rộng Hội Quốc liên.", "Thành lập tổ chức Liên hợp quốc.", "Thành lập tổ chức Hội Quốc liên."], correct: 2 },
+  { q: "Tổ chức quốc tế được xem như tiền thân của Liên hợp quốc là", options: ["khối Hiệp ước.", "khối Đồng minh.", "Hội Quốc liên.", "Liên minh châu Âu."], correct: 2 },
+  { q: "Ngày 1/1/1942, tại Oa-sinh-tơn (Mỹ), đại diện của 26 nước đã ký văn kiện nào sau đây?", options: ["Tuyên bố Liên hợp quốc.", "Hiệp định Muynich.", "Hiệp ước Rôma.", "Hiệp ước Maxtrich."], correct: 0 },
+  { q: "Ngày 24-10-1945, sau khi Quốc hội các nước thành viên phê chuẩn, bản Hiến chương của Liên hợp quốc", options: ["được chính thức thông qua.", "chính thức có hiệu lực.", "chính thức được công bố.", "được bổ sung, hoàn chỉnh."], correct: 1 },
+  { q: "Một trong những quốc gia có vai trò quan trọng trong quá trình hình thành Liên hợp quốc là", options: ["Thái Lan.", "Anh.", "Nhật Bản.", "Lào."], correct: 1 },
+  { q: "Tại hội nghị I-an-ta (2-1945), nguyên thủ của những quốc gia nào sau đây đã ra quyết định về việc thành lập Liên hợp quốc?", options: ["Anh, Pháp, Liên Xô.", "Anh, Mĩ, Liên Xô.", "Anh, Pháp, Đức.", "Anh, Pháp, Mĩ."], correct: 1 },
+  { q: "Bản Hiến chương Liên hợp quốc đã được thông qua khi cuộc chiến tranh thế giới thứ hai", options: ["bắt đầu lan ra khu vực châu Phi.", "bắt đầu lan ra khu vực châu Á.", "bước vào giai đoạn quyết liệt.", "bước vào giai đoạn kết thúc."], correct: 3 },
+  { q: "Các nước Đồng minh đã thành lập tổ chức nào để phù hợp với khát vọng được sống trong hòa bình của nhân dân thế giới?", options: ["Liên hợp quốc.", "Hội Quốc Liên.", "Ngân hàng thế giới.", "Liên minh châu Âu."], correct: 0 },
+  { q: "Tổ chức Liên hợp quốc được thành lập trong bối cảnh nhân dân thế giới ý thức sâu sắc về hậu quả tàn khốc của", options: ["khủng hoảng kinh tế.", "chiến tranh lạnh.", "phân hóa giàu nghèo.", "chiến tranh thế giới."], correct: 3 },
+  { q: "Tổ chức Liên hợp quốc được thành lập năm 1945 nhằm đáp ứng nhu cầu nào sau đây của toàn thể nhân loại?", options: ["Nâng cao đời sống tinh thần con người.", "Chống biến đổi khí hậu trên toàn cầu.", "Bảo vệ hòa bình, an ninh toàn thế giới.", "Thúc đẩy khoa học công nghệ phát triển."], correct: 2 },
+  { q: "Nội dung nào sau đây là một trong những quyết định quan trọng của Hội nghị I-an-ta (2/1945)?", options: ["Phân chia phạm vi ảnh hưởng ở châu Phi, châu Úc giữa các nước Đồng minh.", "Phân chia nước Đức thành bốn khu vực chiếm đóng của Đồng minh.", "Thành lập tổ chức Liên hợp quốc để duy trì hòa bình, an ninh thế giới.", "Phân công quân đội Đồng minh giải giáp quân Nhật ở Đông Dương."], correct: 2 }
+];
 
 /* ============ ELEMENTS ============ */
 const introEl    = document.getElementById('intro');
@@ -337,21 +515,28 @@ const dotsEl     = document.getElementById('dots');
 const confirmBtn = document.getElementById('confirmBtn');
 const doneEl     = document.getElementById('done');
 const doneName   = document.getElementById('doneName');
-const backBtn    = document.getElementById('backBtn');
+const menuEl     = document.getElementById('menu');
+const quizEl     = document.getElementById('quiz');
+const resultEl   = document.getElementById('result');
+const reviewEl   = document.getElementById('review');
 
-let cards        = [];
-let cardCenters  = [];
-let falloffDist  = 0;
-let cardPitch    = 0;
+/* ============ STATE ============ */
+let cards         = [];
+let cardCenters   = [];
+let falloffDist   = 0;
 let selectedIndex = null;
-let dragged      = false;
-let introDone    = false;
-let activeDot    = INITIAL_INDEX;
-let rafId        = 0;
-let scrollAnimId = 0;
+let dragged       = false;
+let introDone     = false;
+let activeDot     = INITIAL_INDEX;
+let rafId         = 0;
+let scrollAnimId  = 0;
+
+let currentUser       = '';
+let currentQuestionIdx = 0;
+let userAnswers       = [];
 
 /* ============================================================
-   CHÀO
+   PHẦN 1: CHÀO
    ============================================================ */
 const GREET_TEXT = 'chào thằng l';
 
@@ -370,48 +555,35 @@ function playGreeting(){
 function goToPick(){
   if (introDone) return;
   introDone = true;
-
   measureGeometry();
   centerOnIndex(INITIAL_INDEX, true);
   updateProgress();
-
   introEl.classList.add('hidden');
   pickEl.classList.remove('hidden');
 }
-
 introEl.addEventListener('click', goToPick);
-window.addEventListener('keydown', (e) => {
-  if (!introDone && (e.key === 'Enter' || e.key === ' ')) goToPick();
-});
 
 /* ============================================================
-   RENDER
+   PHẦN 2: CHỌN THÀNH VIÊN
    ============================================================ */
 function renderMembers(){
   const frag = document.createDocumentFragment();
   MEMBERS.forEach((m, i) => {
     const card = document.createElement('div');
     card.className = 'card';
-    
     const avatarContent = m.img
       ? `<img src="${m.img}" alt="${m.name}" draggable="false" loading="lazy">`
       : `<span class="emo">${m.emoji || '👤'}</span>`;
-
     card.innerHTML = `
       <div class="card-inner">
         <div class="tag">#${i + 1}</div>
-        <div class="avatar" style="background:linear-gradient(140deg,${m.c1},${m.c2})">
-          ${avatarContent}
-        </div>
+        <div class="avatar" style="background:linear-gradient(140deg,${m.c1},${m.c2})">${avatarContent}</div>
         <div class="name">${m.name}</div>
-      </div>
-    `;
-
+      </div>`;
     card.addEventListener('click', () => {
       if (dragged) return;
       selectMember(i);
     });
-
     frag.appendChild(card);
   });
   sliderEl.appendChild(frag);
@@ -423,7 +595,6 @@ function renderDots(){
   MEMBERS.forEach((_, i) => {
     const d = document.createElement('button');
     d.className = 'dot';
-    d.setAttribute('aria-label', `Thành viên ${i + 1}`);
     d.addEventListener('click', () => scrollToCard(i));
     frag.appendChild(d);
   });
@@ -435,14 +606,9 @@ function updateActiveDot(i){
   if (i === activeDot && dotsEl.children[i]?.classList.contains('active')) return;
   activeDot = i;
   const dots = dotsEl.children;
-  for (let k = 0; k < dots.length; k++){
-    dots[k].classList.toggle('active', k === i);
-  }
+  for (let k = 0; k < dots.length; k++) dots[k].classList.toggle('active', k === i);
 }
 
-/* ============================================================
-   ĐO HÌNH HỌC
-   ============================================================ */
 function measureGeometry(){
   const n = cards.length;
   cardCenters.length = n;
@@ -450,11 +616,9 @@ function measureGeometry(){
   for (let i = 0; i < n; i++){
     const c = cards[i];
     cardCenters[i] = c.offsetLeft + c.offsetWidth / 2;
-    const w = c.offsetWidth;
-    if (w > falloffDist) falloffDist = w;
+    if (c.offsetWidth > falloffDist) falloffDist = c.offsetWidth;
   }
-  cardPitch = falloffDist + (parseFloat(getComputedStyle(sliderEl).columnGap) || 16);
-  falloffDist = cardPitch;
+  falloffDist += (parseFloat(getComputedStyle(sliderEl).columnGap) || 16);
 }
 
 function targetScrollFor(i){
@@ -463,62 +627,43 @@ function targetScrollFor(i){
 }
 
 function centerOnIndex(i, instant){
-  const target = targetScrollFor(i);
-  if (instant){
-    sliderEl.scrollLeft = target;
-  } else {
-    smoothScrollTo(target);
-  }
+  if (instant) sliderEl.scrollLeft = targetScrollFor(i);
+  else smoothScrollTo(targetScrollFor(i));
   updateActiveDot(i);
 }
 
 function updateProgress(){
   const viewCenter = sliderEl.scrollLeft + sliderEl.clientWidth / 2;
-  let bestIdx = 0;
-  let bestDist = Infinity;
-
+  let bestIdx = 0, bestDist = Infinity;
   for (let i = 0; i < cards.length; i++){
     const dist = Math.abs(cardCenters[i] - viewCenter);
     if (dist < bestDist){ bestDist = dist; bestIdx = i; }
-
     let p = 1 - dist / falloffDist;
     if (p < 0) p = 0;
     const inv = 1 - p;
-    const eased = 1 - inv * inv * inv; // easeOutCubic
-    cards[i].style.setProperty('--p', eased);
+    cards[i].style.setProperty('--p', 1 - inv * inv * inv);
   }
-
   if (bestIdx !== activeDot) updateActiveDot(bestIdx);
 }
 
-function onScroll(){
+sliderEl.addEventListener('scroll', () => {
   if (rafId) return;
-  rafId = requestAnimationFrame(() => {
-    rafId = 0;
-    updateProgress();
-  });
-}
-sliderEl.addEventListener('scroll', onScroll, { passive:true });
+  rafId = requestAnimationFrame(() => { rafId = 0; updateProgress(); });
+}, { passive:true });
 
 function smoothScrollTo(target, duration = 460){
   cancelAnimationFrame(scrollAnimId);
-
   const start = sliderEl.scrollLeft;
   const delta = target - start;
   if (Math.abs(delta) < 0.5) return;
-
   sliderEl.classList.add('dragging');
   const t0 = performance.now();
-
   function step(now){
     const t = Math.min((now - t0) / duration, 1);
     const eased = 1 - Math.pow(1 - t, 5);
     sliderEl.scrollLeft = start + delta * eased;
-    if (t < 1){
-      scrollAnimId = requestAnimationFrame(step);
-    } else {
-      sliderEl.classList.remove('dragging');
-    }
+    if (t < 1) scrollAnimId = requestAnimationFrame(step);
+    else sliderEl.classList.remove('dragging');
   }
   scrollAnimId = requestAnimationFrame(step);
 }
@@ -528,73 +673,44 @@ function scrollToCard(i){
   updateActiveDot(i);
 }
 
-/* Kéo chuột desktop */
-let isDown = false;
-let startX = 0;
-let startScroll = 0;
-let lastX = 0;
-let lastT = 0;
-let velocity = 0;
-
+/* Mouse Drag */
+let isDown = false, startX = 0, startScroll = 0, lastX = 0, lastT = 0, velocity = 0;
 sliderEl.addEventListener('pointerdown', (e) => {
   if (e.pointerType !== 'mouse' || e.button !== 0) return;
   cancelAnimationFrame(scrollAnimId);
-  isDown = true;
-  dragged = false;
-  startX = e.clientX;
-  lastX = e.clientX;
-  lastT = performance.now();
-  startScroll = sliderEl.scrollLeft;
-  velocity = 0;
+  isDown = true; dragged = false;
+  startX = e.clientX; lastX = e.clientX; lastT = performance.now();
+  startScroll = sliderEl.scrollLeft; velocity = 0;
   sliderEl.classList.add('dragging');
 });
-
 window.addEventListener('pointermove', (e) => {
   if (!isDown) return;
   const dx = e.clientX - startX;
   if (Math.abs(dx) > 6) dragged = true;
   sliderEl.scrollLeft = startScroll - dx;
-
-  const now = performance.now();
-  const dt = now - lastT;
-  if (dt > 0){
-    const instant = (e.clientX - lastX) / dt;
-    velocity = velocity * 0.7 + instant * 0.3;
-  }
-  lastX = e.clientX;
-  lastT = now;
+  const now = performance.now(), dt = now - lastT;
+  if (dt > 0) velocity = velocity * 0.7 + ((e.clientX - lastX) / dt) * 0.3;
+  lastX = e.clientX; lastT = now;
 }, { passive:true });
-
 window.addEventListener('pointerup', () => {
   if (!isDown) return;
   isDown = false;
-
-  if (!dragged){
-    sliderEl.classList.remove('dragging');
-    return;
-  }
-
+  if (!dragged){ sliderEl.classList.remove('dragging'); return; }
   let v = -velocity * 16;
   const decay = 0.93;
-
   function inertia(){
     v *= decay;
-    if (Math.abs(v) < 0.6){
-      snapToNearest();
-      return;
-    }
+    if (Math.abs(v) < 0.6) { snapToNearest(); return; }
     sliderEl.scrollLeft += v;
     requestAnimationFrame(inertia);
   }
   requestAnimationFrame(inertia);
-
   setTimeout(() => { dragged = false; }, 80);
 });
 
 function snapToNearest(){
   const viewCenter = sliderEl.scrollLeft + sliderEl.clientWidth / 2;
-  let best = 0;
-  let bestDist = Infinity;
+  let best = 0, bestDist = Infinity;
   for (let i = 0; i < cardCenters.length; i++){
     const d = Math.abs(cardCenters[i] - viewCenter);
     if (d < bestDist){ bestDist = d; best = i; }
@@ -603,31 +719,17 @@ function snapToNearest(){
   updateActiveDot(best);
 }
 
-/* Keyboard & resize */
-window.addEventListener('keydown', (e) => {
-  if (pickEl.classList.contains('hidden')) return;
-  if (e.key === 'ArrowRight') scrollToCard(Math.min(activeDot + 1, MEMBERS.length - 1));
-  if (e.key === 'ArrowLeft')  scrollToCard(Math.max(activeDot - 1, 0));
-  if (e.key === 'Enter' && selectedIndex !== null) confirmBtn.click();
-});
-
-let resizeTimer;
 window.addEventListener('resize', () => {
-  clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => {
-    if (pickEl.classList.contains('hidden')) return;
+  if (!pickEl.classList.contains('hidden')) {
     measureGeometry();
     centerOnIndex(activeDot, true);
     updateProgress();
-  }, 120);
+  }
 });
 
-/* Chọn */
 function selectMember(i){
   selectedIndex = i;
-  for (let k = 0; k < cards.length; k++){
-    cards[k].classList.toggle('selected', k === i);
-  }
+  for (let k = 0; k < cards.length; k++) cards[k].classList.toggle('selected', k === i);
   scrollToCard(i);
   confirmBtn.textContent = `Chốt, tao là ${MEMBERS[i].name} →`;
   confirmBtn.classList.add('show');
@@ -637,17 +739,22 @@ function selectMember(i){
 confirmBtn.addEventListener('click', () => {
   if (selectedIndex === null) return;
   const chosen = MEMBERS[selectedIndex];
+  currentUser = chosen.name;
   try {
-    localStorage.setItem('tayTrongQuan.member', JSON.stringify({
-      index: selectedIndex, name: chosen.name
-    }));
+    localStorage.setItem('tayTrongQuan.member', JSON.stringify({ index: selectedIndex, name: chosen.name }));
   } catch (err){}
   doneName.textContent = chosen.name;
   pickEl.classList.add('hidden');
   doneEl.classList.remove('hidden');
 });
 
-backBtn.addEventListener('click', () => {
+document.getElementById('enterBtn').addEventListener('click', () => {
+  doneEl.classList.add('hidden');
+  menuEl.classList.remove('hidden');
+  document.getElementById('menuUser').textContent = `Chào ${currentUser},`;
+});
+
+document.getElementById('backBtn').addEventListener('click', () => {
   doneEl.classList.add('hidden');
   pickEl.classList.remove('hidden');
   measureGeometry();
@@ -657,7 +764,182 @@ backBtn.addEventListener('click', () => {
   }, 60);
 });
 
-/* Khởi động */
+/* ============================================================
+   PHẦN 3: LOGIC LÀM BÀI
+   ============================================================ */
+function startQuiz() {
+  currentQuestionIdx = 0;
+  userAnswers = new Array(QUESTIONS.length).fill(null);
+  menuEl.classList.add('hidden');
+  quizEl.classList.remove('hidden');
+  renderQuestion(0);
+}
+
+function renderQuestion(index) {
+  currentQuestionIdx = index;
+  const q = QUESTIONS[index];
+  const body = document.getElementById('quizBody');
+  
+  document.getElementById('quizCurrent').textContent = index + 1;
+  document.getElementById('quizProgressBar').style.width = ((index) / QUESTIONS.length * 100) + '%';
+  
+  let optionsHtml = '';
+  q.options.forEach((opt, i) => {
+    optionsHtml += `
+      <div class="option" onclick="selectAnswer(${i})" data-index="${i}">
+        <span class="opt-label">${String.fromCharCode(65 + i)}.</span>
+        <span class="opt-text">${opt}</span>
+      </div>`;
+  });
+  
+  body.innerHTML = `
+    <div class="question-text">Câu ${index + 1}: ${q.q}</div>
+    <div class="options-list">${optionsHtml}</div>
+    <div class="feedback hidden" id="feedback"></div>
+  `;
+  
+  const nextBtn = document.getElementById('nextBtn');
+  nextBtn.classList.add('hidden');
+  if (index === QUESTIONS.length - 1) nextBtn.textContent = 'Xem kết quả';
+  else nextBtn.textContent = 'Tiếp tục';
+}
+
+function selectAnswer(optIndex) {
+  if (userAnswers[currentQuestionIdx] !== null) return;
+  userAnswers[currentQuestionIdx] = optIndex;
+  
+  const q = QUESTIONS[currentQuestionIdx];
+  const isCorrect = optIndex === q.correct;
+  const opts = document.querySelectorAll('#quizBody .option');
+  
+  opts.forEach((el, i) => {
+    el.classList.add('disabled');
+    el.onclick = null;
+    if (i === q.correct) el.classList.add('correct');
+    if (i === optIndex && !isCorrect) el.classList.add('wrong');
+    if (i === optIndex) el.classList.add('selected');
+  });
+  
+  const feedback = document.getElementById('feedback');
+  feedback.classList.remove('hidden');
+  if (isCorrect) {
+    feedback.className = 'feedback correct';
+    feedback.innerHTML = `<span class="icon">✓</span> Chính xác!`;
+  } else {
+    feedback.className = 'feedback wrong';
+    feedback.innerHTML = `<span class="icon">✗</span> Sai rồi. Đáp án đúng là: <strong>${String.fromCharCode(65 + q.correct)}. ${q.options[q.correct]}</strong>`;
+  }
+  
+  document.getElementById('nextBtn').classList.remove('hidden');
+}
+
+function nextQuestion() {
+  if (currentQuestionIdx < QUESTIONS.length - 1) {
+    renderQuestion(currentQuestionIdx + 1);
+  } else {
+    finishQuiz();
+  }
+}
+
+function finishQuiz() {
+  quizEl.classList.add('hidden');
+  resultEl.classList.remove('hidden');
+  
+  let correctCount = 0;
+  userAnswers.forEach((ans, i) => { if (ans === QUESTIONS[i].correct) correctCount++; });
+  
+  const percent = (correctCount / QUESTIONS.length) * 100;
+  document.getElementById('resultScore').textContent = correctCount;
+  
+  const evalEl = document.getElementById('resultEval');
+  const imgEl = document.getElementById('resultImg');
+  
+  // Xóa class show cũ để reset animation
+  imgEl.classList.remove('show');
+  
+  if (percent < 70) {
+    evalEl.textContent = 'l ngu';
+    evalEl.style.color = 'var(--error)';
+    evalEl.style.textShadow = '0 0 20px rgba(255,107,107,.5)';
+    
+    // Ảnh dưới 70% là qminh2.png
+    imgEl.src = 'lon/qminh2.png';
+  } else {
+    evalEl.textContent = 'gút chóp';
+    evalEl.style.color = 'var(--success)';
+    evalEl.style.textShadow = '0 0 20px rgba(29,209,161,.5)';
+    
+    // Ảnh trên 70% là mhai2.webp
+    imgEl.src = 'lon/mhai2.webp';
+  }
+  
+  // Đợi 1 xíu để chạy animation hiện ảnh
+  setTimeout(() => {
+    imgEl.classList.add('show');
+  }, 100);
+}
+
+/* ============================================================
+   PHẦN 4: XEM LẠI & ĐIỀU HƯỚNG
+   ============================================================ */
+function showReview() {
+  resultEl.classList.add('hidden');
+  reviewEl.classList.remove('hidden');
+  
+  const list = document.getElementById('reviewList');
+  let html = '';
+  
+  QUESTIONS.forEach((q, i) => {
+    const userAns = userAnswers[i];
+    const isCorrect = userAns === q.correct;
+    
+    let optionsHtml = '';
+    q.options.forEach((opt, optIdx) => {
+      let cls = 'option disabled';
+      if (optIdx === q.correct) cls += ' correct';
+      if (optIdx === userAns && !isCorrect) cls += ' wrong';
+      
+      let icon = '';
+      if (optIdx === q.correct) icon = '<span class="icon-check">✓</span>';
+      else if (optIdx === userAns && !isCorrect) icon = '<span class="icon-x">✗</span>';
+      
+      optionsHtml += `
+        <div class="${cls}">
+          <span class="opt-label">${String.fromCharCode(65 + optIdx)}.</span>
+          <span class="opt-text">${opt}</span>
+          ${icon}
+        </div>`;
+    });
+    
+    html += `
+      <div class="review-item">
+        <div class="review-q">Câu ${i + 1}: ${q.q}</div>
+        <div class="options-list">${optionsHtml}</div>
+        <div class="review-answer">
+          ${isCorrect 
+            ? '<span style="color:var(--success)">✓ Bạn chọn đúng</span>' 
+            : `<span style="color:var(--error)">✗ Bạn chọn sai. Đáp án đúng: ${String.fromCharCode(65 + q.correct)}. ${q.options[q.correct]}</span>`
+          }
+        </div>
+      </div>`;
+  });
+  
+  list.innerHTML = html;
+}
+
+function backToResult() {
+  reviewEl.classList.add('hidden');
+  resultEl.classList.remove('hidden');
+}
+
+function backToMenu() {
+  resultEl.classList.add('hidden');
+  menuEl.classList.remove('hidden');
+}
+
+/* ============================================================
+   KHỞI ĐỘNG
+   ============================================================ */
 renderMembers();
 renderDots();
 playGreeting();
