@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Tay Trong Quần — Trắc Nghiệm Sử</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#08080c;
+    --fg:#f4f4f8;
+    --muted:rgba(244,244,248,.5);
+    --accent:#ff9f43;
+    --accent-2:#ff6b6b;
+    --accent-3:#6c5ce7;
+
+    --card-w: min(240px, 66vw);
+    --card-gap: 16px;
+
+    --ease-out-quint:cubic-bezier(.22,1,.36,1);
+    --ease-spring:cubic-bezier(.34,1.56,.64,1);
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;}
+
+  body{
+    background:var(--bg);
+    color:var(--fg);
+    font-family:'Plus Jakarta Sans',system-ui,-apple-system,sans-serif;
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    user-select:none;
+    -webkit-font-smoothing:antialiased;
+    overscroll-behavior:none;
+  }
+
+  /* AURORA */
+  .aurora{
+    position:fixed;inset:0;z-index:0;pointer-events:none;
+    contain:strict;
+  }
+  .aurora::before,.aurora::after{
+    content:'';position:absolute;border-radius:50%;
+    will-change:transform;
+  }
+  .aurora::before{
+    width:80vmax;height:80vmax;
+    left:-25vmax;top:-20vmax;
+    background:radial-gradient(circle, rgba(255,159,67,.32) 0%, rgba(255,159,67,.08) 40%, transparent 70%);
+    animation:drift1 22s ease-in-out infinite alternate;
+  }
+  .aurora::after{
+    width:90vmax;height:90vmax;
+    right:-35vmax;bottom:-30vmax;
+    background:radial-gradient(circle, rgba(108,92,231,.36) 0%, rgba(108,92,231,.08) 45%, transparent 70%);
+    animation:drift2 26s ease-in-out infinite alternate;
+  }
+  @keyframes drift1{
+    0%{transform:translate3d(0,0,0) scale(1);}
+    100%{transform:translate3d(6vw,4vh,0) scale(1.12);}
+  }
+  @keyframes drift2{
+    0%{transform:translate3d(0,0,0) scale(1);}
+    100%{transform:translate3d(-5vw,-6vh,0) scale(1.08);}
+  }
+
+  .grain{
+    position:fixed;inset:0;z-index:1;pointer-events:none;opacity:.025;
+    contain:strict;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Screens */
+  .screen{
+    position:fixed;inset:0;z-index:2;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    transition:opacity .7s var(--ease-out-quint),transform .7s var(--ease-out-quint),filter .7s var(--ease-out-quint);
+  }
+  .screen.hidden{opacity:0;transform:scale(1.05);filter:blur(12px);pointer-events:none;}
+
+  /* MÀN 1 */
+  #intro{cursor:pointer;}
+  #greeting{
+    display:flex;flex-wrap:wrap;justify-content:center;
+    font-size:clamp(1.6rem,7vw,5.5rem);
+    font-weight:800;letter-spacing:-.02em;line-height:1.1;
+    padding:0 24px;text-align:center;
+  }
+  #greeting span{
+    display:inline-block;opacity:0;
+    background:linear-gradient(180deg,#fff 30%,var(--accent) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:charIn .8s var(--ease-spring) forwards;
+    will-change:transform,opacity,filter;
+  }
+  @keyframes charIn{
+    from{opacity:0;transform:translateY(40px) rotate(-8deg) scale(.6);filter:blur(8px);}
+    to{opacity:1;transform:translateY(0) rotate(0) scale(1);filter:blur(0);}
+  }
+  .skip-hint{
+    position:absolute;bottom:max(48px,env(safe-area-inset-bottom));
+    font-size:.72rem;letter-spacing:.3em;text-transform:uppercase;color:var(--muted);
+    opacity:0;animation:fadeIn .8s 1.4s forwards;
+  }
+  @keyframes fadeIn{to{opacity:1;}}
+
+  /* MÀN 2 */
+  #pick{
+    gap:14px;
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .pick-header{display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 24px;}
+  .pick-title{
+    font-size:clamp(1.3rem,6vw,2.2rem);font-weight:800;letter-spacing:-.02em;text-align:center;
+    background:linear-gradient(90deg,#fff 0%,var(--accent) 50%,#fff 100%);
+    background-size:200% auto;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:shine 5s linear infinite;
+  }
+  @keyframes shine{to{background-position:200% center;}}
+  .pick-sub{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);}
+
+  /* SLIDER */
+  .slider{
+    position:relative;
+    display:flex;align-items:center;
+    gap:var(--card-gap);
+    width:100%;
+    padding-block:28px;
+    padding-inline:calc((100vw - var(--card-w)) / 2);
+    overflow-x:auto;overflow-y:hidden;
+    scroll-snap-type:x mandatory;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+    overscroll-behavior-x:contain;
+    touch-action:pan-x;
+    cursor:grab;
+  }
+  .slider::-webkit-scrollbar{display:none;}
+  .slider.dragging{cursor:grabbing;scroll-snap-type:none;}
+
+  .card{
+    --p:0;
+    flex:0 0 auto;
+    width:var(--card-w);
+    scroll-snap-align:center;
+    scroll-snap-stop:always;
+    contain:content;
+  }
+
+  .card-inner{
+    border-radius:22px;
+    background:
+      linear-gradient(150deg, rgba(255,255,255,.09) 0%, rgba(255,255,255,.02) 55%, rgba(255,255,255,.05) 100%),
+      #15152a;
+    border:1px solid rgba(255,255,255,.08);
+    overflow:hidden;position:relative;cursor:pointer;
+
+    transform:
+      translate3d(0, calc(-8px * var(--p)), 0)
+      scale(calc(0.87 + 0.13 * var(--p)));
+    opacity:calc(0.4 + 0.6 * var(--p));
+
+    transition:border-color .3s ease, box-shadow .3s ease;
+    will-change:transform, opacity;
+    backface-visibility:hidden;
+  }
+
+  .avatar{
+    aspect-ratio:1/1.1;
+    display:flex;align-items:center;justify-content:center;
+    font-size:clamp(66px,19vw,100px);
+    position:relative;overflow:hidden;
+    background: #15152a;
+  }
+  .avatar::after{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(180deg,transparent 40%,rgba(8,8,12,.9) 100%);
+    pointer-events:none;
+  }
+  
+  .avatar img{
+    width:100%;height:100%;object-fit:cover;
+    position:relative;z-index:1;
+    object-position:center;
+  }
+  
+  .avatar .emo{
+    position:relative;z-index:1;
+    filter:drop-shadow(0 8px 24px rgba(0,0,0,.5));
+    transform:scale(calc(0.92 + 0.12 * var(--p)));
+    will-change:transform;
+  }
+
+  .name{
+    padding:10px 14px 18px;text-align:center;font-weight:700;font-size:1rem;letter-spacing:-.01em;
+    position:relative;z-index:2;margin-top:-44px;
+    text-shadow:0 2px 12px rgba(0,0,0,.9);
+  }
+  .tag{
+    position:absolute;top:12px;left:12px;
+    font-size:.6rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;
+    background:rgba(8,8,12,.55);
+    padding:5px 10px;border-radius:999px;
+    border:1px solid rgba(255,255,255,.12);
+    z-index:3;
+  }
+
+  /* Selected */
+  .card.selected .card-inner{
+    border-color:rgba(255,159,67,.6);
+    box-shadow:
+      0 0 0 1px rgba(255,159,67,.4),
+      0 0 40px rgba(255,159,67,.4),
+      0 20px 40px rgba(0,0,0,.5);
+  }
+  .card.selected .card-inner::before{
+    content:'✓';
+    position:absolute;top:10px;right:10px;
+    width:28px;height:28px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#0a0a0f;font-weight:800;font-size:.95rem;
+    display:flex;align-items:center;justify-content:center;
+    z-index:4;
+    box-shadow:0 0 24px rgba(255,159,67,.7);
+    animation:pop .4s var(--ease-spring);
+  }
+  @keyframes pop{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+
+  /* Dots */
+  .dots{display:flex;gap:6px;align-items:center;height:14px;}
+  .dot{
+    width:6px;height:6px;border-radius:50%;
+    background:rgba(255,255,255,.18);border:none;padding:0;cursor:pointer;
+    transition:all .4s var(--ease-out-quint);
+  }
+  .dot.active{width:22px;border-radius:999px;background:var(--accent);box-shadow:0 0 12px rgba(255,159,67,.6);}
+
+  /* Confirm */
+  .confirm{
+    margin-top:6px;padding:15px 34px;border:none;border-radius:999px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    color:#0a0a0f;font-size:1rem;font-weight:800;letter-spacing:-.01em;
+    cursor:pointer;
+    opacity:0;transform:translateY(20px) scale(.9);pointer-events:none;
+    transition:all .5s var(--ease-spring);
+    box-shadow:0 10px 30px rgba(255,107,107,.35);
+    font-family:inherit;position:relative;overflow:hidden;
+  }
+  .confirm::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(120deg,transparent 30%,rgba(255,255,255,.5) 50%,transparent 70%);
+    transform:translateX(-100%);
+    transition:transform .6s var(--ease-out-quint);
+  }
+  .confirm:hover::before{transform:translateX(100%);}
+  .confirm.show{opacity:1;transform:translateY(0) scale(1);pointer-events:auto;}
+  .confirm:active{transform:scale(.96);transition-duration:.1s;}
+
+  /* MÀN 3 */
+  #done{gap:16px;text-align:center;padding:0 32px;}
+  #done .big{font-size:clamp(1rem,4.5vw,1.2rem);font-weight:600;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+  #done .who{
+    font-size:clamp(1.8rem,8vw,3rem);font-weight:800;letter-spacing:-.02em;
+    background:linear-gradient(180deg,#fff 20%,var(--accent) 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    text-shadow:0 0 40px rgba(255,159,67,.3);
+  }
+  #done .note{font-size:.85rem;color:var(--muted);max-width:340px;line-height:1.7;}
+  .ghost-btn{
+    margin-top:12px;padding:12px 26px;border-radius:999px;
+    background:transparent;border:1px solid rgba(255,255,255,.15);
+    color:var(--fg);font-size:.85rem;font-weight:600;
+    cursor:pointer;font-family:inherit;
+    transition:all .3s var(--ease-out-quint);
+  }
+  .ghost-btn:hover{border-color:var(--accent);color:var(--accent);transform:translateY(-2px);}
+  .ghost-btn:active{transform:translateY(0) scale(.97);}
+</style>
+</head>
+<body>
+
+<div class="aurora"></div>
+<div class="grain"></div>
+
+<div id="intro" class="screen">
+  <h1 id="greeting"></h1>
+  <div class="skip-hint">bấm để bỏ qua</div>
+</div>
+
+<div id="pick" class="screen hidden">
+  <div class="pick-header">
+    <div class="pick-title">Mày là thằng l nào?</div>
+    <div class="pick-sub">vuốt để tìm bản thân</div>
+  </div>
+  <div class="slider" id="slider"></div>
+  <div class="dots" id="dots"></div>
+  <button class="confirm" id="confirmBtn"></button>
+</div>
+
+<div id="done" class="screen hidden">
+  <div class="big">Chốt</div>
+  <div class="who" id="doneName"></div>
+  <div class="note">Danh tính đã ghi nhận. Bài tập Sử sắp mở.</div>
+  <button class="ghost-btn" id="backBtn">← chọn lại</button>
+</div>
+
+<script>
+/* ============================================================
+   DANH SÁCH 10 THÀNH VIÊN — ĐÃ ĐỔI TÊN TƯƠNG ỨNG
+   ============================================================ */
+const MEMBERS = [
+  { name:'Nhật Khánh',  img:'lon/khanh.webp',   emoji:'🐵', c1:'#ff6b6b', c2:'#ee5a24' },
+  { name:'Gia Hào',     img:'lon/hao.webp',     emoji:'🐸', c1:'#48dbfb', c2:'#0abde3' },
+  { name:'Thiện',       img:'lon/thien.webp',   emoji:'🐷', c1:'#f368e0', c2:'#e84393' }, // Số 3
+  { name:'Minh Hải',    img:'lon/hai.jpg',      emoji:'🐔', c1:'#1dd1a1', c2:'#10ac84' },
+  { name:'Hữu Quốc',    img:'lon/quoc.webp',    emoji:'🐶', c1:'#feca57', c2:'#ff9f43' },
+  { name:'Đình Khiêm',  img:'lon/khiem.jpeg',   emoji:'🐱', c1:'#a29bfe', c2:'#6c5ce7' },
+  { name:'Thành Đạt',   img:'lon/thanhdat.webp',emoji:'🐼', c1:'#fd79a8', c2:'#d63031' },
+  { name:'Quang Minh',  img:'lon/qminh.webp',   emoji:'🦊', c1:'#55efc4', c2:'#00b894' },
+  { name:'Bảo Nam',     img:'lon/nam.jpg',      emoji:'🐺', c1:'#74b9ff', c2:'#0984e3' },
+  { name:'Miki',        img:'lon/miki.webp',    emoji:'🐯', c1:'#ffeaa7', c2:'#fdcb6e' },
+];
+
+const INITIAL_INDEX = 4; // index 4 = Hữu Quốc
+
+/* ============ ELEMENTS ============ */
+const introEl    = document.getElementById('intro');
+const greetingEl = document.getElementById('greeting');
+const pickEl     = document.getElementById('pick');
+const sliderEl   = document.getElementById('slider');
+const dotsEl     = document.getElementById('dots');
+const confirmBtn = document.getElementById('confirmBtn');
+const doneEl     = document.getElementById('done');
+const doneName   = document.getElementById('doneName');
+const backBtn    = document.getElementById('backBtn');
+
+let cards        = [];
+let cardCenters  = [];
+let falloffDist  = 0;
+let cardPitch    = 0;
+let selectedIndex = null;
+let dragged      = false;
+let introDone    = false;
+let activeDot    = INITIAL_INDEX;
+let rafId        = 0;
+let scrollAnimId = 0;
+
+/* ============================================================
+   CHÀO
+   ============================================================ */
+const GREET_TEXT = 'chào thằng l';
+
+function playGreeting(){
+  greetingEl.innerHTML = '';
+  [...GREET_TEXT].forEach((ch, i) => {
+    const s = document.createElement('span');
+    s.textContent = (ch === ' ') ? '\u00A0' : ch;
+    s.style.animationDelay = (0.18 + i * 0.06) + 's';
+    greetingEl.appendChild(s);
+  });
+  const totalMs = (0.18 + GREET_TEXT.length * 0.06 + 0.8) * 1000;
+  setTimeout(goToPick, totalMs + 500);
+}
+
+function goToPick(){
+  if (introDone) return;
+  introDone = true;
+
+  measureGeometry();
+  centerOnIndex(INITIAL_INDEX, true);
+  updateProgress();
+
+  introEl.classList.add('hidden');
+  pickEl.classList.remove('hidden');
+}
+
+introEl.addEventListener('click', goToPick);
+window.addEventListener('keydown', (e) => {
+  if (!introDone && (e.key === 'Enter' || e.key === ' ')) goToPick();
+});
+
+/* ============================================================
+   RENDER
+   ============================================================ */
+function renderMembers(){
+  const frag = document.createDocumentFragment();
+  MEMBERS.forEach((m, i) => {
+    const card = document.createElement('div');
+    card.className = 'card';
+    
+    const avatarContent = m.img
+      ? `<img src="${m.img}" alt="${m.name}" draggable="false" loading="lazy">`
+      : `<span class="emo">${m.emoji || '👤'}</span>`;
+
+    card.innerHTML = `
+      <div class="card-inner">
+        <div class="tag">#${i + 1}</div>
+        <div class="avatar" style="background:linear-gradient(140deg,${m.c1},${m.c2})">
+          ${avatarContent}
+        </div>
+        <div class="name">${m.name}</div>
+      </div>
+    `;
+
+    card.addEventListener('click', () => {
+      if (dragged) return;
+      selectMember(i);
+    });
+
+    frag.appendChild(card);
+  });
+  sliderEl.appendChild(frag);
+  cards = Array.prototype.slice.call(sliderEl.children);
+}
+
+function renderDots(){
+  const frag = document.createDocumentFragment();
+  MEMBERS.forEach((_, i) => {
+    const d = document.createElement('button');
+    d.className = 'dot';
+    d.setAttribute('aria-label', `Thành viên ${i + 1}`);
+    d.addEventListener('click', () => scrollToCard(i));
+    frag.appendChild(d);
+  });
+  dotsEl.appendChild(frag);
+  updateActiveDot(activeDot);
+}
+
+function updateActiveDot(i){
+  if (i === activeDot && dotsEl.children[i]?.classList.contains('active')) return;
+  activeDot = i;
+  const dots = dotsEl.children;
+  for (let k = 0; k < dots.length; k++){
+    dots[k].classList.toggle('active', k === i);
+  }
+}
+
+/* ============================================================
+   ĐO HÌNH HỌC
+   ============================================================ */
+function measureGeometry(){
+  const n = cards.length;
+  cardCenters.length = n;
+  falloffDist = 0;
+  for (let i = 0; i < n; i++){
+    const c = cards[i];
+    cardCenters[i] = c.offsetLeft + c.offsetWidth / 2;
+    const w = c.offsetWidth;
+    if (w > falloffDist) falloffDist = w;
+  }
+  cardPitch = falloffDist + (parseFloat(getComputedStyle(sliderEl).columnGap) || 16);
+  falloffDist = cardPitch;
+}
+
+function targetScrollFor(i){
+  const c = cards[i];
+  return c.offsetLeft - (sliderEl.clientWidth - c.offsetWidth) / 2;
+}
+
+function centerOnIndex(i, instant){
+  const target = targetScrollFor(i);
+  if (instant){
+    sliderEl.scrollLeft = target;
+  } else {
+    smoothScrollTo(target);
+  }
+  updateActiveDot(i);
+}
+
+function updateProgress(){
+  const viewCenter = sliderEl.scrollLeft + sliderEl.clientWidth / 2;
+  let bestIdx = 0;
+  let bestDist = Infinity;
+
+  for (let i = 0; i < cards.length; i++){
+    const dist = Math.abs(cardCenters[i] - viewCenter);
+    if (dist < bestDist){ bestDist = dist; bestIdx = i; }
+
+    let p = 1 - dist / falloffDist;
+    if (p < 0) p = 0;
+    const inv = 1 - p;
+    const eased = 1 - inv * inv * inv; // easeOutCubic
+    cards[i].style.setProperty('--p', eased);
+  }
+
+  if (bestIdx !== activeDot) updateActiveDot(bestIdx);
+}
+
+function onScroll(){
+  if (rafId) return;
+  rafId = requestAnimationFrame(() => {
+    rafId = 0;
+    updateProgress();
+  });
+}
+sliderEl.addEventListener('scroll', onScroll, { passive:true });
+
+function smoothScrollTo(target, duration = 460){
+  cancelAnimationFrame(scrollAnimId);
+
+  const start = sliderEl.scrollLeft;
+  const delta = target - start;
+  if (Math.abs(delta) < 0.5) return;
+
+  sliderEl.classList.add('dragging');
+  const t0 = performance.now();
+
+  function step(now){
+    const t = Math.min((now - t0) / duration, 1);
+    const eased = 1 - Math.pow(1 - t, 5);
+    sliderEl.scrollLeft = start + delta * eased;
+    if (t < 1){
+      scrollAnimId = requestAnimationFrame(step);
+    } else {
+      sliderEl.classList.remove('dragging');
+    }
+  }
+  scrollAnimId = requestAnimationFrame(step);
+}
+
+function scrollToCard(i){
+  smoothScrollTo(targetScrollFor(i));
+  updateActiveDot(i);
+}
+
+/* Kéo chuột desktop */
+let isDown = false;
+let startX = 0;
+let startScroll = 0;
+let lastX = 0;
+let lastT = 0;
+let velocity = 0;
+
+sliderEl.addEventListener('pointerdown', (e) => {
+  if (e.pointerType !== 'mouse' || e.button !== 0) return;
+  cancelAnimationFrame(scrollAnimId);
+  isDown = true;
+  dragged = false;
+  startX = e.clientX;
+  lastX = e.clientX;
+  lastT = performance.now();
+  startScroll = sliderEl.scrollLeft;
+  velocity = 0;
+  sliderEl.classList.add('dragging');
+});
+
+window.addEventListener('pointermove', (e) => {
+  if (!isDown) return;
+  const dx = e.clientX - startX;
+  if (Math.abs(dx) > 6) dragged = true;
+  sliderEl.scrollLeft = startScroll - dx;
+
+  const now = performance.now();
+  const dt = now - lastT;
+  if (dt > 0){
+    const instant = (e.clientX - lastX) / dt;
+    velocity = velocity * 0.7 + instant * 0.3;
+  }
+  lastX = e.clientX;
+  lastT = now;
+}, { passive:true });
+
+window.addEventListener('pointerup', () => {
+  if (!isDown) return;
+  isDown = false;
+
+  if (!dragged){
+    sliderEl.classList.remove('dragging');
+    return;
+  }
+
+  let v = -velocity * 16;
+  const decay = 0.93;
+
+  function inertia(){
+    v *= decay;
+    if (Math.abs(v) < 0.6){
+      snapToNearest();
+      return;
+    }
+    sliderEl.scrollLeft += v;
+    requestAnimationFrame(inertia);
+  }
+  requestAnimationFrame(inertia);
+
+  setTimeout(() => { dragged = false; }, 80);
+});
+
+function snapToNearest(){
+  const viewCenter = sliderEl.scrollLeft + sliderEl.clientWidth / 2;
+  let best = 0;
+  let bestDist = Infinity;
+  for (let i = 0; i < cardCenters.length; i++){
+    const d = Math.abs(cardCenters[i] - viewCenter);
+    if (d < bestDist){ bestDist = d; best = i; }
+  }
+  smoothScrollTo(targetScrollFor(best), 380);
+  updateActiveDot(best);
+}
+
+/* Keyboard & resize */
+window.addEventListener('keydown', (e) => {
+  if (pickEl.classList.contains('hidden')) return;
+  if (e.key === 'ArrowRight') scrollToCard(Math.min(activeDot + 1, MEMBERS.length - 1));
+  if (e.key === 'ArrowLeft')  scrollToCard(Math.max(activeDot - 1, 0));
+  if (e.key === 'Enter' && selectedIndex !== null) confirmBtn.click();
+});
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (pickEl.classList.contains('hidden')) return;
+    measureGeometry();
+    centerOnIndex(activeDot, true);
+    updateProgress();
+  }, 120);
+});
+
+/* Chọn */
+function selectMember(i){
+  selectedIndex = i;
+  for (let k = 0; k < cards.length; k++){
+    cards[k].classList.toggle('selected', k === i);
+  }
+  scrollToCard(i);
+  confirmBtn.textContent = `Chốt, tao là ${MEMBERS[i].name} →`;
+  confirmBtn.classList.add('show');
+  if (navigator.vibrate) navigator.vibrate(18);
+}
+
+confirmBtn.addEventListener('click', () => {
+  if (selectedIndex === null) return;
+  const chosen = MEMBERS[selectedIndex];
+  try {
+    localStorage.setItem('tayTrongQuan.member', JSON.stringify({
+      index: selectedIndex, name: chosen.name
+    }));
+  } catch (err){}
+  doneName.textContent = chosen.name;
+  pickEl.classList.add('hidden');
+  doneEl.classList.remove('hidden');
+});
+
+backBtn.addEventListener('click', () => {
+  doneEl.classList.add('hidden');
+  pickEl.classList.remove('hidden');
+  measureGeometry();
+  setTimeout(() => {
+    centerOnIndex(selectedIndex ?? INITIAL_INDEX, true);
+    updateProgress();
+  }, 60);
+});
+
+/* Khởi động */
+renderMembers();
+renderDots();
+playGreeting();
+</script>
+</body>
+</html>
